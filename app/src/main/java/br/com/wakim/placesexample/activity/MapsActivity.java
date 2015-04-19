@@ -36,15 +36,15 @@ import br.com.wakim.placesexample.adapter.PlacesInfoWindowAdapter;
 import br.com.wakim.placesexample.adapter.PlacesListAdapter;
 import br.com.wakim.placesexample.adapter.PlacesPagerAdater;
 
-public class MapsActivity extends FragmentActivity implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, ViewPager.OnPageChangeListener, PlacesListAdapter.ListCallback, SlidingUpPanelLayout.PanelSlideListener {
+public class MapsActivity extends FragmentActivity implements GoogleApiClient.ConnectionCallbacks,
+    GoogleApiClient.OnConnectionFailedListener, ViewPager.OnPageChangeListener,
+    PlacesListAdapter.ListCallback, GoogleMap.OnMarkerClickListener {
 
     private GoogleMap mMap; // Might be null if Google Play services APK is not available.
     private GoogleApiClient mGoogleApiClient;
 
     private RecyclerView mRecyclerView;
     private ViewPager mPager;
-
-    private SlidingUpPanelLayout mSlidingUpLayout;
 
     private PlacesListAdapter mAdapter;
     private PlacesPagerAdater mPagerAdapter;
@@ -68,7 +68,6 @@ public class MapsActivity extends FragmentActivity implements GoogleApiClient.Co
         setUpMapIfNeeded();
 
         mGoogleApiClient = new GoogleApiClient.Builder(this)
-                .addApi(Places.GEO_DATA_API)
                 .addApi(Places.PLACE_DETECTION_API)
                 .addConnectionCallbacks(this)
                 .addOnConnectionFailedListener(this)
@@ -76,7 +75,6 @@ public class MapsActivity extends FragmentActivity implements GoogleApiClient.Co
 
         configureViewPager();
         configureRecyclerView();
-        configureSlidingUp();
         queryForNearbyPlaces();
     }
 
@@ -104,12 +102,6 @@ public class MapsActivity extends FragmentActivity implements GoogleApiClient.Co
                 setUpMap();
             }
         }
-    }
-
-    private void configureSlidingUp() {
-        mSlidingUpLayout = (SlidingUpPanelLayout) findViewById(R.id.sliding_layout);
-
-        mSlidingUpLayout.setPanelSlideListener(this);
     }
 
     private void configureViewPager() {
@@ -175,6 +167,7 @@ public class MapsActivity extends FragmentActivity implements GoogleApiClient.Co
         mMap.setBuildingsEnabled(true);
         mMap.setOnMyLocationChangeListener(mListener);
         mMap.setInfoWindowAdapter(mInfoWindowAdapter);
+        mMap.setOnMarkerClickListener(this);
     }
 
     private void moveToLocationOneShot(Location location) {
@@ -235,25 +228,12 @@ public class MapsActivity extends FragmentActivity implements GoogleApiClient.Co
     }
 
     @Override
-    public void onPanelSlide(View view, float v) {}
+    public boolean onMarkerClick(Marker marker) {
+        int position = mMarkers.indexOf(marker);
 
-    @Override
-    public void onPanelCollapsed(View view) {
-        Log.d("TAG", "onPanelCollapsed");
-    }
+        mPager.setCurrentItem(position, true);
+        mRecyclerView.smoothScrollToPosition(position);
 
-    @Override
-    public void onPanelExpanded(View view) {
-        Log.d("TAG", "onPanelExpanded");
-    }
-
-    @Override
-    public void onPanelAnchored(View view) {
-        Log.d("TAG", "onPanelAnchored");
-    }
-
-    @Override
-    public void onPanelHidden(View view) {
-        Log.d("TAG", "onPanelHidden");
+        return false;
     }
 }

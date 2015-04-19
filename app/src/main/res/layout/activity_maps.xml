@@ -20,4 +20,3 @@
 
     <include layout="@layout/sliding_panel" />
 </com.sothree.slidinguppanel.SlidingUpPanelLayout>
-
